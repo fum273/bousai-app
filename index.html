@@ -1,0 +1,532 @@
+<!doctype html>
+<!-- 1行目の <!doctype html> は「このファイルはHTML5で書かれています」という宣言です。 -->
+
+<!-- 2行目の <html lang="ja"> はHTML全体の開始で、ページの言語を日本語と指定します。 -->
+<html lang="ja">
+
+<!-- ここからページの設定情報(head)が始まります。 -->
+<head>
+
+<!-- 文字コードをUTF-8に指定します。日本語が文字化けしないようにするための設定です。 -->
+<meta charset="utf-8">
+
+<!-- スマホ向けの表示設定です。画面幅に合わせて表示し、ノッチ(画面上部の切り欠き)の裏まで描画を広げます。 -->
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+
+<!-- ブラウザのタブに表示されるページのタイトルです。 -->
+<title>きょうの備え</title>
+
+<!-- Google Fontsから日本語フォント「Zen Kaku Gothic New」を読み込みます。 -->
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Zen+Kaku+Gothic+New:wght@500;700;900&display=swap">
+
+<!-- ここからCSS(見た目の指定)が始まります。 -->
+<style>
+
+/* CSS変数(色の名前)の定義です。ライトモード用に、背景(--bg)、カードの面(--surface)、文字(--ink)、薄い文字(--muted)、線(--line)、緑の標識(--sign)、標識上の文字(--on-sign)、注意テープの黄色(--tape)を決めています。 */
+:root{--bg:#F2F5F1;--surface:#fff;--ink:#16231C;--muted:#5A6A60;--line:#D5DED7;--sign:#0B7A4F;--on-sign:#fff;--tape:#F4B400;
+
+/* 余白の計算方法(box-sizing)、ノッチを避ける上下の余白(safe-area)、ライトモードの宣言(color-scheme)です。 */
+box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px);color-scheme:light}
+
+/* 端末がダークモードのとき、色を暗い配色に置き換えます。ただし data-theme="light" と明示されている場合は除きます。 */
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#0E1612;--surface:#17221C;--ink:#E7F0EA;--muted:#9AABA0;--line:#2B3A31;--sign:#0F8A5C;color-scheme:dark}}
+
+/* data-theme="dark" と明示されたときも、同じ暗い配色を使います。 */
+:root[data-theme="dark"]{--bg:#0E1612;--surface:#17221C;--ink:#E7F0EA;--muted:#9AABA0;--line:#2B3A31;--sign:#0F8A5C;color-scheme:dark}
+
+/* すべての要素と疑似要素について、余白の計算方法を親の設定に合わせます。 */
+*,*::before,*::after{box-sizing:inherit}
+
+/* ページ内を移動するとき、ノッチの下に隠れないよう上に余白を取ります。 */
+html{scroll-padding-top:env(safe-area-inset-top,0px)}
+
+/* ページ全体の設定です。余白なし、背景色と文字色、フォントの優先順、行間、下にナビ用の余白(84px)を指定しています。 */
+body{margin:0;background:var(--bg);color:var(--ink);font-family:"Zen Kaku Gothic New","Hiragino Kaku Gothic ProN","Hiragino Sans","Noto Sans JP",Meiryo,sans-serif;line-height:1.7;padding-bottom:84px}
+
+/* 画面の最上部(ノッチの部分)を背景色で塞ぐ帯です。下のコンテンツが透けて見えるのを防ぎます。 */
+body::before{content:"";position:fixed;inset:0 0 auto;height:env(safe-area-inset-top,0px);background:var(--bg);z-index:10}
+
+/* アプリ全体を入れる箱です。最大幅560px、中央寄せ、内側に余白を付けます。 */
+#app{max-width:560px;margin:0 auto;padding:20px 16px}
+
+/* 大見出し(h1)の文字サイズ・太さ・行間・余白です。 */
+h1{font-size:30px;font-weight:900;line-height:1.3;margin:0 0 4px}
+
+/* 小見出し(h2)の設定です。display:flex と space-between で、右端に「2/5」のような数を寄せて表示できます。 */
+h2{font-size:16px;font-weight:700;margin:20px 0 8px;display:flex;justify-content:space-between}
+
+/* カードの中で最初に来るh2は、上の余白をなくします。 */
+h2:first-child{margin-top:0}
+
+/* 段落(p)の標準の余白をなくします。 */
+p{margin:0}
+
+/* 日付表示(.date)は薄い文字色にします。 */
+.date{color:var(--muted);font-weight:500}
+
+/* 説明文(.sub)は薄い文字色にして、下に余白を付けます。 */
+.sub{color:var(--muted);margin-bottom:16px}
+
+/* ヘッダー部分の下に余白を付けます。 */
+header{margin-bottom:16px}
+
+/* カード(白い箱)の見た目です。背景、枠線、角丸、内側の余白、下の余白を指定しています。 */
+.card{background:var(--surface);border:1px solid var(--line);border-radius:14px;padding:18px;margin-bottom:16px}
+
+/* 「2/5」のような数字(.n)は薄い文字色にして、少し細くします。 */
+.n{color:var(--muted);font-weight:500}
+
+/* チップ(選択ボタン)を並べる領域です。横に並べ、はみ出したら折り返します。 */
+.chips{display:flex;flex-wrap:wrap;gap:8px}
+
+/* チップの見た目です。最小高さ44px(押しやすい大きさ)、丸い角、枠線を指定しています。 */
+.chip{font:inherit;min-height:44px;padding:6px 16px;border-radius:999px;border:1.5px solid var(--line);background:var(--surface);color:var(--ink);cursor:pointer}
+
+/* 選択中のチップ(aria-pressed="true")は、緑の背景に白い太字にします。 */
+.chip[aria-pressed="true"]{background:var(--sign);border-color:var(--sign);color:#fff;font-weight:700}
+
+/* 人数を変える部分(ステッパー)を横並びにして、縦方向の中央に揃えます。 */
+.step{display:flex;align-items:center;gap:16px}
+
+/* 人数の＋/−ボタンです。44pxの丸いボタンにします。 */
+.step button{font:inherit;font-size:22px;width:44px;height:44px;border-radius:50%;border:1.5px solid var(--line);background:var(--surface);color:var(--ink);cursor:pointer}
+
+/* 人数の表示部分です。文字サイズ、最小幅、中央揃えを指定しています。 */
+.step b{font-size:20px;min-width:3em;text-align:center}
+
+/* 大きな保存ボタン(.cta)です。横幅いっぱい、緑背景、白文字にします。 */
+.cta{font:inherit;font-weight:700;width:100%;min-height:52px;margin-top:24px;border:0;border-radius:10px;background:var(--sign);color:#fff;cursor:pointer}
+
+/* 目立たない版のボタン(.ghost)です。背景を透明にして枠線だけにします。 */
+.cta.ghost{background:transparent;color:var(--ink);border:1.5px solid var(--line);margin-top:0}
+
+/* キーボード操作でボタンにフォーカスしたとき、黄色の枠線を表示します。 */
+button:focus-visible{outline:3px solid var(--tape);outline-offset:2px}
+
+/* 今日のタスク: 防災の標識をイメージした緑の板 + 注意テープ */
+/* 「今日のタスク」の緑の板(.sign)です。背景、角丸、はみ出しの非表示、下余白を指定し、さらに色の変数(--tc, --tm, --cbg, --ctick)を白系に上書きして、中の文字やチェックを白で表示させます。 */
+.sign{background:var(--sign);color:var(--on-sign);border-radius:6px;overflow:hidden;margin-bottom:16px;--tc:var(--on-sign);--tm:rgba(255,255,255,.85);--cbg:#fff;--ctick:var(--sign)}
+
+/* 注意テープです。repeating-linear-gradient で、黄色と黒の斜めしま模様を作っています。 */
+.tape{height:10px;background:repeating-linear-gradient(135deg,var(--tape) 0 12px,#1b1b1b 12px 24px)}
+
+/* 標識の内側の余白です。 */
+.signin{padding:18px}
+
+/* 標識の上部に出るメッセージ文字です(太字・18px)。 */
+.msg{font-weight:700;font-size:18px;margin-bottom:8px}
+
+/* タスク一覧(ul)の黒丸と余白を消します。 */
+.tasks{list-style:none;margin:0;padding:0}
+
+/* タスク1件分の行です。横並びにして、上に区切り線を引きます。区切り線は color-mix で文字色を薄めて作り、文字色は変数 --tc を使います。 */
+.task{display:flex;gap:14px;padding:14px 0;border-top:1px solid color-mix(in srgb,var(--tc,var(--ink)) 22%,transparent);color:var(--tc,var(--ink))}
+
+/* 最初の行だけは、上の区切り線を消します。 */
+.task:first-child{border-top:0}
+
+/* タスク名(.tt)を太字にします。 */
+.tt{font-weight:700}
+
+/* 補足説明(.rs)の小さい文字と色です。 */
+.rs{font-size:14px;color:var(--tm,var(--muted))}
+
+/* 理由タグ(.tag)の小さい文字と色です。 */
+.tag{font-size:13px;color:var(--tm,var(--muted));margin-top:2px}
+
+/* 完了したタスクの名前に取り消し線を引き、少し薄くします。 */
+.task.done .tt{text-decoration:line-through;opacity:.75}
+
+/* チェックボタン(.chk)です。32px四角、角丸、文字色の枠線、透明な背景にします。 */
+.chk{flex:none;width:32px;height:32px;margin-top:2px;border-radius:8px;border:2px solid var(--tc,var(--ink));background:transparent;cursor:pointer;position:relative}
+
+/* 押された状態のチェックボタンは、背景を塗りつぶします。 */
+.chk[aria-pressed="true"]{background:var(--cbg,var(--sign))}
+
+/* チェックマークです。疑似要素(::after)の枠線を回転させて「レ」の字を描いています。 */
+.chk[aria-pressed="true"]::after{content:"";position:absolute;left:9px;top:3px;width:8px;height:15px;border:solid var(--ctick,#fff);border-width:0 3px 3px 0;transform:rotate(45deg)}
+
+/* 白いカード内のタスクは、色の変数を通常の配色(濃い文字、緑のチェック)に戻します。 */
+.card .tasks{--tc:var(--ink);--tm:var(--muted);--cbg:var(--sign);--ctick:#fff}
+
+/* 「もう1つ提案してもらう」ボタンの見た目です(白い細枠、透明な背景)。 */
+.more{font:inherit;width:100%;min-height:44px;margin-top:8px;border:1.5px solid rgba(255,255,255,.7);border-radius:8px;background:transparent;color:var(--on-sign);cursor:pointer}
+
+/* 進み具合の表示部分です。数字と「%」を文字の下端でそろえて横に並べます。 */
+.score{display:flex;align-items:baseline;gap:2px;margin-bottom:12px}
+
+/* 大きなパーセントの数字です。 */
+.score b{font-size:56px;font-weight:900;line-height:1}
+
+/* 「%」記号の大きさです。 */
+.score span{font-size:20px;font-weight:700}
+
+/* 「備えの進み具合」という説明文の見た目です。 */
+.score p{margin-left:14px;color:var(--muted);font-size:14px;line-height:1.5}
+
+/* 分野別の一覧です。黒丸を消して、縦に並べます。 */
+.cats{list-style:none;margin:0;padding:0;display:grid;gap:8px}
+
+/* 分野別の1行です。3列(名前・バー・数)のグリッドにします。 */
+.cats li{display:grid;grid-template-columns:6.5em 1fr 3em;align-items:center;gap:10px;font-size:14px}
+
+/* 右端の「2/5」のような数を右寄せにします。 */
+.cats .n{text-align:right}
+
+/* 進み具合バーの背景(灰色の溝)です。 */
+.bar{height:8px;border-radius:4px;background:var(--line);overflow:hidden}
+
+/* バーの中身(緑)です。幅が変わるとき、0.3秒かけてなめらかに動きます。 */
+.bar i{display:block;height:100%;background:var(--sign);transition:width .3s}
+
+/* 下のナビゲーションバーを画面の下に固定します。 */
+nav{position:fixed;left:0;right:0;bottom:0;display:flex;background:var(--surface);border-top:1px solid var(--line);padding-bottom:env(safe-area-inset-bottom,0px);z-index:5}
+
+/* ナビの各ボタンの見た目です。均等な幅で、高さは56pxにします。 */
+nav button{flex:1;font:inherit;min-height:56px;border:0;background:transparent;color:var(--muted);cursor:pointer}
+
+/* いま開いているタブを緑の太字にして、上に緑の線を入れます。 */
+nav button[aria-current="page"]{color:var(--sign);font-weight:900;box-shadow:inset 0 3px 0 var(--sign)}
+
+/* 「動きを減らす」設定の端末では、アニメーションをすべて無効にします。 */
+@media (prefers-reduced-motion:reduce){*{transition:none!important}}
+
+/* この下のstyleでCSS(見た目の指定)が終わります。 */
+</style>
+
+<!-- headの終わりです。 -->
+</head>
+
+<!-- ここから、画面に表示される本体(body)が始まります。 -->
+<body>
+
+<!-- アプリの画面は、この空の箱(id="app")の中にJavaScriptが描画します。 -->
+<div id="app"></div>
+
+<!-- ここからJavaScript(動作のプログラム)が始まります。 -->
+<script>
+
+// ---------- データ(ここを増やすと提案できる備えが増えます) ----------
+
+// 分野の記号と表示名の対応表(オブジェクト)です。例: w は「水・食料」。
+const CATS={w:'水・食料',e:'避難',h:'家の安全',b:'持ち出し袋',i:'連絡・情報'};
+
+// 災害の記号と表示名の対応表です。
+const HZ={quake:'地震',tsunami:'津波',flood:'水害',landslide:'土砂災害'};
+
+// p: 優先度(3が最優先) / h: 関係する災害 / m: 関係する家族 / home: 住まいの形
+// 備えの一覧(配列)の始まりです。以下、1行が1項目です。
+const ITEMS=[
+
+// 項目1「飲料水」です。id=名前、c=分野、p=優先度、t=タイトル、w=理由の説明です。t は人数(p.people)から量を計算する関数で、${} の中が計算結果に置き換わります。
+{id:'water',c:'w',p:3,t:p=>`飲料水を${p.people*9}L分、備蓄する`,w:'1人1日3Lの3日分が最低ラインです。支援が届くまでの命綱になります。'},
+
+// 項目2「保存食」です。人数×3日分を表示します。
+{id:'food',c:'w',p:3,t:p=>`${p.people}人×3日分の保存食をそろえる`,w:'火を使わずに食べられるものも混ぜておくと安心です。'},
+
+// 項目3「簡易トイレ」です。人数×15回分(1人1日5回×3日)を表示します。
+{id:'toilet',c:'w',p:3,t:p=>`簡易トイレを${p.people*15}回分用意する`,w:'断水すると、水より先にトイレで困ります。1人1日5回×3日が目安です。'},
+
+// 項目4「カセットコンロ」です。タイトルは固定の文字列です。
+{id:'stove',c:'w',p:2,t:'カセットコンロとボンベを用意する',w:'温かい食事は体力と気持ちを支えます。'},
+
+// 項目5「現金」です。優先度は1と低めです。
+{id:'cash',c:'w',p:1,t:'小銭を含む現金を用意する',w:'停電中はカードや電子決済が使えないことがあります。'},
+
+// 項目6「避難場所の確認」です。
+{id:'shelter',c:'e',p:3,t:'ハザードマップで避難場所を確認する',w:'自宅の想定被害と最寄りの避難場所を知ることが、すべての出発点です。'},
+
+// 項目7「避難場所まで歩く」です。
+{id:'route',c:'e',p:2,t:'避難場所まで実際に歩いてみる',w:'地図で見るのと、暗い中で歩くのとでは大きく違います。'},
+
+// 項目8「津波」です。h:'tsunami' があるので、津波を選んだ人だけが対象になります。
+{id:'tsunami',c:'e',p:3,h:'tsunami',t:'津波避難ビルや高台の場所を確認する',w:'津波は到達までの時間が短いので、逃げる先を事前に決めておきます。'},
+
+// 項目9「土砂災害」です。土砂災害を選んだ人だけが対象です。
+{id:'landslide',c:'e',p:3,h:'landslide',t:'土砂災害警戒区域かどうかを調べる',w:'警戒情報が出たら早めに動けるよう、安全な避難先も決めておきます。'},
+
+// 項目10「水害の浸水想定」です。水害を選んだ人だけが対象です。
+{id:'flood',c:'e',p:3,h:'flood',t:'浸水の想定深さを確認する',w:'想定が自宅の階より深いなら、水平避難か垂直避難かを決めておきます。'},
+
+// 項目11「家具の固定」です。地震を選んだ人だけが対象です。
+{id:'fix',c:'h',p:3,h:'quake',t:'背の高い家具を固定する',w:'地震でのけがの多くは、家具の転倒や落下によるものです。'},
+
+// 項目12「寝室の家具配置」です。地震を選んだ人だけが対象です。
+{id:'bed',c:'h',p:2,h:'quake',t:'寝室の家具配置を見直す',w:'寝ている場所に倒れてこない配置にし、枕元に靴と懐中電灯を置きます。'},
+
+// 項目13「ブレーカーとガスの元栓」です。地震を選んだ人だけが対象です。
+{id:'gas',c:'h',p:2,h:'quake',t:'ブレーカーとガスの元栓の位置を確認する',w:'避難前に切ることで、通電火災などを防げます。'},
+
+// 項目14「備蓄を高い場所へ」です。水害を選び、かつ一戸建て(home:'house')の人だけが対象です。
+{id:'high',c:'h',p:2,h:'flood',home:'house',t:'備蓄や貴重品を2階など高い場所へ移す',w:'1階が浸水しても、高い場所にあれば使えます。'},
+
+// 項目15「階段の避難経路」です。マンション・アパート(home:'apartment')の人だけが対象です。
+{id:'stair',c:'h',p:2,home:'apartment',t:'玄関前・階段の避難経路に物がないか確認する',w:'マンションではエレベーターが止まります。階段が避難の頼りです。'},
+
+// 項目16「持ち出し袋」です。
+{id:'bag',c:'b',p:3,t:'非常用持ち出し袋を玄関近くに置く',w:'すぐ持って出られる場所にあることが、中身と同じくらい大切です。'},
+
+// 項目17「懐中電灯」です。
+{id:'light',c:'b',p:3,t:'懐中電灯と予備電池を取り出しやすい所に置く',w:'夜の停電では、まず明かりが必要です。'},
+
+// 項目18「ラジオ・手回し充電器」です。
+{id:'radio',c:'b',p:2,t:'ラジオか手回し充電器を用意する',w:'スマホが使えなくなっても、情報を得る手段が残ります。'},
+
+// 項目19「モバイルバッテリー」です。
+{id:'batt',c:'b',p:2,t:'モバイルバッテリーを満充電にしておく',w:'月に1回の充電チェックを習慣にしましょう。'},
+
+// 項目20「乳幼児用品」です。m:'kids' があるので、乳幼児がいる家庭だけが対象です。
+{id:'baby',c:'b',p:3,m:'kids',t:'ミルク・おむつ・哺乳瓶など乳幼児用品を入れる',w:'代わりがきかないものなので、最低3日分を。'},
+
+// 項目21「常備薬」です。高齢の家族がいる家庭だけが対象です。
+{id:'med',c:'b',p:3,m:'elderly',t:'常備薬とお薬手帳のコピーを入れる',w:'薬が切れると体調を崩しやすいので、数日分の余裕を。'},
+
+// 項目22「ペット用品」です。ペットがいる家庭だけが対象です。
+{id:'pet',c:'b',p:3,m:'pets',t:'ペットのフード・水・ケージを用意する',w:'同行避難ができるか、避難所のルールも事前に確認します。'},
+
+// 項目23「集合場所と連絡方法」です。
+{id:'meet',c:'i',p:3,t:'家族の集合場所と連絡方法を決める',w:'災害用伝言ダイヤル171の使い方も試しておきます。'},
+
+// 項目24「防災アプリ・メール登録」です。
+{id:'app',c:'i',p:2,t:'自治体の防災メールや防災アプリに登録する',w:'避難情報をすばやく受け取れます。'},
+
+// 項目25「書類のコピー」です。最後の要素なので、末尾にカンマはありません。
+{id:'doc',c:'i',p:1,t:'保険証や免許証のコピーを袋に入れる',w:'身分や持病を伝えるときに役立ちます。'}
+
+// 配列の終わりです。
+];
+
+// ---------- 状態と保存(localStorage。使えない環境でも動くよう try/catch) ----------
+// 保存に使うキー名です。localStorage(ブラウザ内の保存場所)の「引き出しの名前」にあたります。
+const KEY='bousai-v1';
+
+// 入力フォームの初期値を返す関数です。住まい=マンション、2人、乳幼児・高齢者・ペットなし、災害=地震。
+const dflt=()=>({home:'apartment',people:2,kids:false,elderly:false,pets:false,hazards:['quake']});
+
+// オブジェクトのコピーを作る関数です。いったん文字列(JSON)にして、元に戻すことで別のコピーになります。
+const clone=o=>JSON.parse(JSON.stringify(o));
+
+// アプリ全体の状態 S(プロフィール・完了記録・今日の提案・開いているタブ)、フォームの状態 F、削除確認の状態 resetArmed を用意します。
+let S={profile:null,done:{},today:null,tab:'today'},F=dflt(),resetArmed=false;
+
+// 起動時に、保存済みのデータを読み込みます。保存が使えない環境でも止まらないよう try/catch で囲んでいます。
+try{const o=JSON.parse(localStorage.getItem(KEY)||'null');if(o){S.profile=o.profile||null;S.done=o.done||{};S.today=o.today||null}}catch(e){}
+
+// 保存する関数です。状態の一部をJSON文字列にして localStorage に書き込みます。失敗しても止まらないよう try/catch で囲んでいます。
+const save=()=>{try{localStorage.setItem(KEY,JSON.stringify({profile:S.profile,done:S.done,today:S.today}))}catch(e){}};
+
+// 今日の日付を「2026-10-25」のような文字列にして返す関数です。
+const todayStr=()=>{const d=new Date();return `${d.getFullYear()}-${d.getMonth()+1}-${d.getDate()}`};
+
+// ---------- 提案ロジック(いまはルールベース) ----------
+// val: 引数が関数ならプロフィールを渡して実行した結果を、そうでなければそのままの値を返します。
+const val=x=>typeof x==='function'?x(S.profile):x;
+
+// hash: 文字列から数値を作る関数です。同じ文字列なら必ず同じ数になります。
+const hash=s=>[...s].reduce((a,c)=>(a*31+c.charCodeAt(0))>>>0,7);
+
+// applicable: いまの状況に当てはまる項目だけを絞り込みます。条件は、災害・家族・住まいの3つです。
+const applicable=()=>ITEMS.filter(i=>(!i.h||S.profile.hazards.includes(i.h))&&(!i.m||S.profile[i.m])&&(!i.home||S.profile.home===i.home));
+
+// score: 項目の点数です。優先度×10、条件に合うほど加点、日付で変わる小さな揺らぎ(hash%5)を足します。
+const score=i=>i.p*10+(i.h?4:0)+(i.m?4:0)+(i.home?2:0)+hash(i.id+todayStr())%5;
+// ★ 次のステップでここをAIに置き換えます(進捗をAPIに送り、提案を受け取る)
+// pick関数: n個の項目を選んで、そのidを返します。ex は除外するidの配列です。
+function pick(n,ex=[]){
+  
+  // 候補を作ります。当てはまる、未完了、除外に含まれない項目を、点数の高い順に並べます。
+  const pool=applicable().filter(i=>!S.done[i.id]&&!ex.includes(i.id)).sort((a,b)=>score(b)-score(a));
+  
+  // 選んだ項目を入れる、空の配列を用意します。
+  const out=[];
+  
+  // 1周目: 同じ分野が重ならないように、上位から1つずつ追加します。
+  for(const i of pool){if(out.length<n&&!out.some(o=>o.c===i.c))out.push(i)}   // まず分野が重ならないように
+  
+  // 2周目: まだ足りなければ、残りの上位から追加します。
+  for(const i of pool){if(out.length<n&&!out.includes(i))out.push(i)}          // 足りなければ上位から補う
+  
+  // 選んだ項目のidだけを返します。
+  return out.map(i=>i.id);
+
+// pick関数の終わりです。
+}
+
+// ensureToday: 今日の分がまだない、または日付が変わっていたときだけ、3つ選んで今日の提案として保存します。
+function ensureToday(){if(S.profile&&(!S.today||S.today.date!==todayStr()))S.today={date:todayStr(),ids:pick(3)}}
+
+// why: 項目に添える理由ラベルを返す関数です。条件に応じて文言を切り替えています(三項演算子の連続)。
+const why=i=>i.h?`選んだリスク「${HZ[i.h]}」に関する備え`:i.m?'家族構成に合わせた備え':i.home?'お住まいの形に合わせた備え':i.p===3?'最優先の基本の備え':'次に進めたい備え';
+
+// ---------- 画面 ----------
+// row: 項目1件分のHTMLを作る関数です。d は完了済みかどうかで、ボタンに data-a(操作の種類)と data-v(項目のid)を持たせます。
+const row=i=>{const d=!!S.done[i.id];return `<li class="task${d?' done':''}"><button class="chk" data-a="toggle" data-v="${i.id}" aria-pressed="${d}" aria-label="${val(i.t)}"></button><div><p class="tt">${val(i.t)}</p><p class="rs">${i.w}</p><p class="tag">${why(i)}</p></div></li>`};
+
+// prog: 項目のリストのうち、完了済みの数を数える関数です。
+const prog=l=>l.filter(i=>S.done[i.id]).length;
+
+// vToday: 「今日」タブの画面のHTMLを作る関数です。
+function vToday(){
+  
+  // 当てはまる項目 app、完了数 dn、進み具合のパーセント pct を計算します。
+  const app=applicable(),dn=prog(app),pct=Math.round(dn/app.length*100);
+  
+  // 今日の項目 ids(idから項目を探します)と、未完了の数 left を求めます。
+  const ids=S.today.ids.map(id=>ITEMS.find(i=>i.id===id)),left=ids.filter(i=>!S.done[i.id]).length;
+  
+  // 日付の表示文字列 ds を作ります(例: 10月25日(日))。
+  const d=new Date(),ds=`${d.getMonth()+1}月${d.getDate()}日(${'日月火水木金土'[d.getDay()]})`;
+  
+  // msg: 状況に応じたメッセージを選びます。提案がない、まだ残りがある、全部完了のどれかです。
+  const msg=!ids.length?'提案できる備えはすべて完了しました。':left?`あと${left}つで、今日の備えは完了です。`:'今日の分は完了です。おつかれさまでした。';
+  
+  // cats: 分野ごとの「名前・バー・完了数/全体数」の行を作り、1つの文字列につなげます。
+  const cats=Object.keys(CATS).map(c=>{const l=app.filter(i=>i.c===c);if(!l.length)return'';const n=prog(l);return `<li><span>${CATS[c]}</span><span class="bar"><i style="width:${n/l.length*100}%"></i></span><span class="n">${n}/${l.length}</span></li>`}).join('');
+  // ここから return 以降は、1つの長いテンプレート文字列です(複数行にまたがっています)。
+  // 138行目: 日付と「きょうの備え」の見出しです。
+  // 139行目: 緑の標識です。注意テープ、メッセージ、今日のタスク一覧、「もう1つ提案してもらう」ボタンを並べます。
+  // 140行目: 進み具合のカードです。大きなパーセント、完了数、分野別のバーを表示します。
+  return `<header><p class="date">${ds}</p><h1>きょうの備え</h1></header>
+  <section class="sign"><div class="tape"></div><div class="signin"><p class="msg">${msg}</p><ul class="tasks">${ids.map(row).join('')}</ul><button class="more" data-a="more">もう1つ提案してもらう</button></div></section>
+  <section class="card"><div class="score"><b>${pct}</b><span>%</span><p>備えの進み具合<br>${dn} / ${app.length} 項目</p></div><ul class="cats">${cats}</ul></section>`;
+
+// vToday関数の終わりです。
+}
+
+// vList: 「チェックリスト」タブの画面を作る関数です。
+function vList(){
+  
+  // 当てはまる項目を取得します。
+  const app=applicable();
+  
+  // 見出しと、分野ごとのカード(分野名、完了数、項目の一覧)をつなげて返します。
+  return `<header><h1>チェックリスト</h1><p class="sub">あなたの状況に合う${app.length}項目です。</p></header>`+Object.keys(CATS).map(c=>{const l=app.filter(i=>i.c===c);return l.length?`<section class="card"><h2>${CATS[c]}<span class="n">${prog(l)}/${l.length}</span></h2><ul class="tasks">${l.map(row).join('')}</ul></section>`:''}).join('');
+
+// vList関数の終わりです。
+}
+
+// vForm: 入力フォームのHTMLを作る関数です。first は初回かどうかで、保存ボタンの文言が変わります。
+function vForm(first){
+  
+  // chip: チップ(選択ボタン)のHTMLを作る補助の関数です。選択中かどうかを aria-pressed に入れます。
+  const chip=(g,v,l,on)=>`<button type="button" class="chip" aria-pressed="${on}" data-a="chip" data-g="${g}" data-v="${v}">${l}</button>`;
+  
+  // ここから return 以降は、複数行にまたがる1つのテンプレート文字列です。
+  // 148行目: 「お住まいの形」の見出しと、2つのチップです。
+  // 149行目: 「同居している人数」の見出しと、−/＋ボタン、人数の表示です。
+  // 150行目: 「家族に当てはまるもの」の見出しと、3つのチップです。
+  // 151行目: 「心配な災害」の見出しと、HZの全項目から作ったチップです。
+  // 152行目: 保存ボタンです。first の値で文言を切り替えています。
+  return `<section class="card"><h2>お住まいの形</h2><div class="chips">${chip('home','apartment','マンション・アパート',F.home==='apartment')}${chip('home','house','一戸建て',F.home==='house')}</div>
+  <h2>同居している人数</h2><div class="step"><button data-a="people" data-v="-1" aria-label="減らす">−</button><b>${F.people}人</b><button data-a="people" data-v="1" aria-label="増やす">＋</button></div>
+  <h2>家族に当てはまるもの</h2><div class="chips">${chip('m','kids','乳幼児',F.kids)}${chip('m','elderly','高齢の家族',F.elderly)}${chip('m','pets','ペット',F.pets)}</div>
+  <h2>心配な災害</h2><div class="chips">${Object.keys(HZ).map(k=>chip('hz',k,HZ[k],F.hazards.includes(k))).join('')}</div>
+  <button class="cta" data-a="fsave">${first?'保存して始める':'変更を保存する'}</button></section>`;
+
+// vForm関数の終わりです。
+}
+
+// vSettings: 「設定」タブの画面を作る関数です。
+function vSettings(){
+  // ここから return 以降は、2行にまたがるテンプレート文字列です。
+  // 155行目: 見出しと説明文、そしてフォーム(vForm(false))です。
+  // 156行目: データ削除ボタンです。1回目の押下後は文言が確認用に変わります。
+  return `<header><h1>設定</h1><p class="sub">変更すると、今日の提案も選び直されます。</p></header>${vForm(false)}
+  <button class="cta ghost" data-a="reset">${resetArmed?'もう一度押すと、すべてのデータを削除します':'データをすべて削除する'}</button>`;
+
+// vSettings関数の終わりです。
+}
+
+// render: 画面全体を描き直す関数です。状態が変わるたびに呼びます。
+function render(){
+  
+  // プロフィールが未入力なら、開くタブを初期設定(setup)にします。
+  if(!S.profile)S.tab='setup';
+  
+  // 開いているタブに対応する関数を選んで実行し、画面のHTMLを v に入れます。setup だけは、その場で見出しとフォームを作ります。
+  const v={setup:()=>`<header><h1>きょうの備え</h1><p class="sub">最初に、暮らしの状況を教えてください。あなたに合う備えだけを提案します。</p></header>`+vForm(true),today:vToday,list:vList,settings:vSettings}[S.tab]();
+  
+  // ナビゲーションのタブ定義です(記号と表示名の組)。
+  const tabs=[['today','今日'],['list','チェックリスト'],['settings','設定']];
+  
+  // ナビのHTMLを作ります。プロフィールがないとき(初期設定中)は表示しません。
+  const nav=S.profile?`<nav>${tabs.map(([k,l])=>`<button data-a="tab" data-v="${k}"${S.tab===k?' aria-current="page"':''}>${l}</button>`).join('')}</nav>`:'';
+  
+  // 作ったHTMLを、id="app" の箱に流し込んで画面を更新します。
+  document.getElementById('app').innerHTML=v+nav;
+
+// render関数の終わりです。
+}
+
+// ---------- 操作 ----------
+// ページ全体のクリックを1か所で受け取ります(イベント委譲)。
+document.addEventListener('click',e=>{
+  
+  // クリックされた場所から、data-a を持つ要素を探します。なければここで終了します。
+  const b=e.target.closest('[data-a]');if(!b)return;
+  
+  // ボタンのdata属性から a(操作の種類)、v(値)、g(グループ)を取り出します。
+  const {a,v,g}=b.dataset;
+  
+  // reset以外の操作をしたら、削除の確認状態を解除します。
+  if(a!=='reset')resetArmed=false;
+  
+  // タブの切り替えです。設定タブを開くときは、フォームに現在のプロフィールのコピーを入れ、画面の先頭へ戻します。
+  if(a==='tab'){S.tab=v;if(v==='settings')F=clone(S.profile);window.scrollTo(0,0)}
+  
+  // チェックのオン/オフです。完了済みなら記録を削除し、未完了なら今日の日付を記録します。
+  else if(a==='toggle'){if(S.done[v])delete S.done[v];else S.done[v]=todayStr()}
+  
+  // 「もう1つ提案してもらう」です。除外付きで1つ選び、今日の提案の末尾に追加します。
+  else if(a==='more'){S.today.ids.push(...pick(1,S.today.ids))}
+  
+  // チップの選択です。
+  else if(a==='chip'){
+    
+    // グループが home なら、住まいの形を設定します。
+    if(g==='home')F.home=v;
+    
+    // グループが m なら、家族(乳幼児・高齢者・ペット)のオン/オフを切り替えます。
+    else if(g==='m')F[v]=!F[v];
+    
+    // それ以外は災害の選択です。すでに選ばれていれば外し(splice)、なければ追加(push)します。
+    else{const k=F.hazards.indexOf(v);if(k<0)F.hazards.push(v);else F.hazards.splice(k,1)}
+  
+  // チップ処理の閉じ括弧です。
+  }
+  
+  // 人数の増減です。1人から10人の範囲に収めます。
+  else if(a==='people'){F.people=Math.min(10,Math.max(1,F.people+Number(v)))}
+  
+  // 設定の保存です。フォームの内容をプロフィールにし、今日の提案を作り直し、今日タブへ移動します。
+  else if(a==='fsave'){S.profile=clone(F);S.today=null;S.tab='today';window.scrollTo(0,0)}
+  
+  // データの全削除です。
+  else if(a==='reset'){
+    
+    // 1回目の押下では、確認状態にするだけです。
+    if(!resetArmed)resetArmed=true;
+    
+    // 2回目の押下で、状態を初期化し、保存データも削除します。
+    else{S={profile:null,done:{},today:null,tab:'setup'};F=dflt();resetArmed=false;try{localStorage.removeItem(KEY)}catch(e){}}
+  
+  // 削除処理の閉じ括弧です。
+  }
+  
+  // どの操作の後も共通の処理です。今日の提案を確認し、プロフィールがあれば保存し、画面を描き直します。
+  ensureToday();if(S.profile)save();render();
+
+// クリックイベントの登録の終わりです。
+});
+
+// 起動時の処理です。今日の提案を用意して、最初の画面を描きます。
+ensureToday();render();
+
+// この下のscriptでJavaScriptが終わります。
+</script>
+
+<!-- bodyの終わりです。 -->
+</body>
+
+<!-- htmlの終わりです。 -->
+</html>
